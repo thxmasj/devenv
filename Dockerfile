@@ -27,7 +27,6 @@ ARG GO_PLUGIN_VERSION=181.5087.39.204
 ARG GO_PLUGIN_UPDATEID=46184
 RUN curl -fL "https://plugins.jetbrains.com/files/9568/${GO_PLUGIN_UPDATEID}/intellij-go-${GO_PLUGIN_VERSION}.zip" -o /tmp/intellij-go.zip \
     && unzip /tmp/intellij-go.zip -d /opt/idea/plugins
-COPY go.sdk.xml ${SETTINGS_DIR}/config/options/go.sdk.xml
 
 ## Docker plugin
 
@@ -62,6 +61,7 @@ RUN export uid=1000 gid=1000 && \
     chmod 0440 /etc/sudoers.d/developer && \
     chown ${uid}:${gid} -R /home/developer
 
+COPY idea/ ${SETTINGS_DIR}/
 RUN chown -R developer:developer ${SETTINGS_DIR}
 
 USER developer
