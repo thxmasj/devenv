@@ -1,0 +1,1 @@
+docker run -it --rm -e DISPLAY=192.168.86.50:0 -v ~/src:/home/developer/src -v ~/.java:/home/developer/.java --name=devenv devenv
