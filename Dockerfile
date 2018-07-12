@@ -4,10 +4,9 @@ FROM ubuntu:18.04
 RUN apt update && apt install -y tzdata
 RUN echo "Europe/Oslo" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
 
-RUN apt install -y curl \
+RUN apt install -y sudo curl unzip git vim \
     # Required by IDEA
     libxext6 libxrender1 libxtst6 libxi6 libfreetype6 \
-    sudo unzip git \
     default-jdk maven \
     golang golang-glide go-bindata \
     lsb-release software-properties-common \
@@ -17,8 +16,8 @@ ARG SETTINGS_DIR=/home/developer/.IntelliJIdea2018.1
 
 ## IntelliJ IDEA
 
-ARG IDEA_VERSION=2018.1.5
-ARG IDEA_SHA256=010cec3753ec3ea9ad5fb96fa584a04a2682896291c21b2d9f575d8f473dc5d5
+ARG IDEA_VERSION=2018.1.6
+ARG IDEA_SHA256=f3e86997a849aabec38c35f1678bcef348569ac5ae75c2db44df306362b12d26
 RUN curl -fL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
