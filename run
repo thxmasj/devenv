@@ -1,1 +1,16 @@
-docker run -it --rm -e DISPLAY=192.168.86.50:0 -v ~/src:/home/developer/src -v ~/.java:/home/developer/.java --name=devenv devenv
+#!/usr/bin/env bash
+
+[[ -d /tmp/.X11-unix ]] && {
+    DISPLAY=$DISPLAY
+} || {
+    DISPLAY=192.168.86.50:0
+}
+
+docker run -it --rm \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v ~/src:/home/developer/src \
+    -v ~/.ssh:/home/developer/.ssh \
+    -v ~/.java:/home/developer/.java \
+    -v ~/.m2:/home/developer/.m2 \
+    --name=devenv devenv
