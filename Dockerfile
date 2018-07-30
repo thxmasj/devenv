@@ -12,27 +12,41 @@ RUN apt install -y sudo curl unzip git vim \
     lsb-release software-properties-common \
 	gtk3.0 # Required by JavaFX (IDEA, Markdown plugin)
 
-ARG SETTINGS_DIR=/home/developer/.IntelliJIdea2018.1
+ARG IDEA_MINOR_VERSION=2018.2
+ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
+
+## Oracle Java
+RUN \
+  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+  add-apt-repository -y ppa:webupd8team/java && \
+  apt-get update && \
+  apt-get install -y oracle-java8-installer
 
 ## IntelliJ IDEA
-
-ARG IDEA_VERSION=2018.1.6
-ARG IDEA_SHA256=f3e86997a849aabec38c35f1678bcef348569ac5ae75c2db44df306362b12d26
+ARG IDEA_VERSION=${IDEA_MINOR_VERSION}
+ARG IDEA_SHA256=dbe4bdd1c4cbce6ec549e0375227d64ac072200b2a92c8766ccb1fcd2ec5a65f
 RUN curl -fL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
+ARG PLUGIN_BASE_URL=https://plugins.jetbrains.com/files
+
+## Lombok plugin
+ARG LOMBOK_PLUGIN_VERSION=0.19-2018.EAP
+ARG LOMBOK_PLUGIN_UPDATEID=47623
+RUN curl -fL "${PLUGIN_BASE_URL}/6317/${LOMBOK_PLUGIN_UPDATEID}/lombok-plugin-${LOMBOK_PLUGIN_VERSION}.zip" -o /tmp/intellij-lombok.zip \
+    && unzip /tmp/intellij-lombok.zip -d /opt/idea/plugins
+
 ## Go plugin
 
-ARG GO_PLUGIN_VERSION=181.5087.39.204
-ARG GO_PLUGIN_UPDATEID=46184
-RUN curl -fL "https://plugins.jetbrains.com/files/9568/${GO_PLUGIN_UPDATEID}/intellij-go-${GO_PLUGIN_VERSION}.zip" -o /tmp/intellij-go.zip \
+ARG GO_PLUGIN_VERSION=182.3684.111.849
+ARG GO_PLUGIN_UPDATEID=48153
+RUN curl -fL "${PLUGIN_BASE_URL}/9568/${GO_PLUGIN_UPDATEID}/intellij-go-${GO_PLUGIN_VERSION}.zip" -o /tmp/intellij-go.zip \
     && unzip /tmp/intellij-go.zip -d /opt/idea/plugins
 
 ## Docker plugin
 
-ARG PLUGIN_BASE_URL=https://plugins.jetbrains.com/files
-ARG DOCKER_PLUGIN_VERSION=181.5087.20
-ARG DOCKER_PLUGIN_UPDATEID=46446
+ARG DOCKER_PLUGIN_VERSION=182.3684.90
+ARG DOCKER_PLUGIN_UPDATEID=48047
 RUN curl -fL "${PLUGIN_BASE_URL}/7724/${DOCKER_PLUGIN_UPDATEID}/Docker-${DOCKER_PLUGIN_VERSION}.zip" -o /tmp/intellij-docker.zip \
     && unzip /tmp/intellij-docker.zip -d /opt/idea/plugins
 
@@ -66,5 +80,6 @@ RUN chown -R developer:developer ${SETTINGS_DIR}
 
 USER developer
 ENV HOME /home/developer
+VOLUME ${SETTINGS_DIR}/config/options/
 
 ENTRYPOINT ["/opt/idea/bin/idea.sh"]

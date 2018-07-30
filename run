@@ -6,6 +6,8 @@
     DISPLAY=192.168.86.50:0
 }
 
+docker ps -q -f name=devenv-data || docker create --name=devenv-data devenv
+
 docker run -it --rm \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -13,4 +15,5 @@ docker run -it --rm \
     -v ~/.ssh:/home/developer/.ssh \
     -v ~/.java:/home/developer/.java \
     -v ~/.m2:/home/developer/.m2 \
+    --volumes-from=devenv-data \
     --name=devenv devenv
