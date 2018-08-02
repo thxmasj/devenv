@@ -4,13 +4,14 @@ FROM ubuntu:18.04
 RUN apt update && apt install -y tzdata
 RUN echo "Europe/Oslo" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
 
-RUN apt install -y sudo curl unzip git vim \
+RUN apt update && apt install -y sudo curl unzip git vim \
     # Required by IDEA
     libxext6 libxrender1 libxtst6 libxi6 libfreetype6 \
     default-jdk maven \
     golang golang-glide go-bindata \
     lsb-release software-properties-common \
-	gtk3.0 # Required by JavaFX (IDEA, Markdown plugin)
+    # Required by JavaFX (IDEA, Markdown plugin)
+    gtk3.0
 
 ARG IDEA_MINOR_VERSION=2018.2
 ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
@@ -19,8 +20,7 @@ ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
 RUN \
   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
   add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer
+  apt update && apt install -y oracle-java8-installer
 
 ## IntelliJ IDEA
 ARG IDEA_VERSION=${IDEA_MINOR_VERSION}

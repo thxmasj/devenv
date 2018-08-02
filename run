@@ -15,5 +15,9 @@ docker run -it --rm \
     -v ~/.ssh:/home/developer/.ssh \
     -v ~/.java:/home/developer/.java \
     -v ~/.m2:/home/developer/.m2 \
+    -v $SSH_AUTH_SOCK:/tmp/ssh_auth_sock \
+    -e SSH_AUTH_SOCK=/tmp/ssh_auth_sock \
     --volumes-from=devenv-data \
-    --name=devenv devenv
+    --name=devenv \
+    --network=host \
+    devenv
