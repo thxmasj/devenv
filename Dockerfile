@@ -66,6 +66,17 @@ RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE
     && chmod +x /usr/local/bin/docker-compose \
     && curl -L https://raw.githubusercontent.com/docker/compose/${DOCKER_COMPOSE_VERSION}/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
 
+## Azure CLI
+
+RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/azure-cli.list \
+    && curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && apt update && apt install -y azure-cli
+
+## MSSQL Tools
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
+    && apt update && ACCEPT_EULA=y apt install -y mssql-tools unixodbc-dev
 
 RUN export uid=1000 gid=1000 && \
     mkdir -p /home/developer && \
@@ -80,6 +91,7 @@ RUN chown -R developer:developer ${SETTINGS_DIR}
 
 USER developer
 ENV HOME /home/developer
+ENV PATH $PATH:/opt/mssql-tools/bin
 VOLUME ${SETTINGS_DIR}/config/options/
 
 ENTRYPOINT ["/opt/idea/bin/idea.sh"]
