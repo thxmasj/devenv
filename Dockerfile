@@ -84,10 +84,12 @@ RUN export uid=1000 gid=1000 && \
     echo "developer:x:${uid}:" >> /etc/group && \
     echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
     chmod 0440 /etc/sudoers.d/developer && \
-    chown ${uid}:${gid} -R /home/developer
+    chown ${uid}:${gid} -R /home/developer && \
+    usermod -a -G docker developer
 
 COPY idea/ ${SETTINGS_DIR}/
 RUN chown -R developer:developer ${SETTINGS_DIR}
+RUN chown -R developer:developer /opt/idea/plugins
 
 USER developer
 ENV HOME /home/developer
