@@ -4,14 +4,17 @@ FROM ubuntu:18.04
 RUN apt update && apt install -y tzdata
 RUN echo "Europe/Oslo" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
 
-RUN apt update && apt install -y sudo curl unzip git vim \
+RUN apt update && apt install -y sudo curl unzip git vim bash-completion \
     # Required by IDEA
     libxext6 libxrender1 libxtst6 libxi6 libfreetype6 \
     default-jdk maven \
     golang golang-glide go-bindata \
-    lsb-release software-properties-common \
+    python3-pip \
+    lsb-release software-properties-common apt-utils locales \
     # Required by JavaFX (IDEA, Markdown plugin)
-    gtk3.0
+    gtk3.0 \
+    && pip3 install cryptography \
+    && locale-gen en_US.UTF-8
 
 ARG IDEA_MINOR_VERSION=2018.2
 ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
@@ -28,27 +31,12 @@ ARG IDEA_SHA256=dbe4bdd1c4cbce6ec549e0375227d64ac072200b2a92c8766ccb1fcd2ec5a65f
 RUN curl -fL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
-ARG PLUGIN_BASE_URL=https://plugins.jetbrains.com/files
-
-## Lombok plugin
-ARG LOMBOK_PLUGIN_VERSION=0.19-2018.EAP
-ARG LOMBOK_PLUGIN_UPDATEID=47623
-RUN curl -fL "${PLUGIN_BASE_URL}/6317/${LOMBOK_PLUGIN_UPDATEID}/lombok-plugin-${LOMBOK_PLUGIN_VERSION}.zip" -o /tmp/intellij-lombok.zip \
-    && unzip /tmp/intellij-lombok.zip -d /opt/idea/plugins
-
-## Go plugin
-
-ARG GO_PLUGIN_VERSION=182.3684.111.849
-ARG GO_PLUGIN_UPDATEID=48153
-RUN curl -fL "${PLUGIN_BASE_URL}/9568/${GO_PLUGIN_UPDATEID}/intellij-go-${GO_PLUGIN_VERSION}.zip" -o /tmp/intellij-go.zip \
-    && unzip /tmp/intellij-go.zip -d /opt/idea/plugins
-
-## Docker plugin
-
-ARG DOCKER_PLUGIN_VERSION=182.3684.90
-ARG DOCKER_PLUGIN_UPDATEID=48047
-RUN curl -fL "${PLUGIN_BASE_URL}/7724/${DOCKER_PLUGIN_UPDATEID}/Docker-${DOCKER_PLUGIN_VERSION}.zip" -o /tmp/intellij-docker.zip \
-    && unzip /tmp/intellij-docker.zip -d /opt/idea/plugins
+# IntelliJ IDEA plugins
+COPY get-plugin /usr/local/bin
+RUN get-plugin 6317 47623 lombok-plugin 0.19-2018.EAP
+RUN get-plugin 9568 48153 intellij-go 182.3684.111.849
+RUN get-plugin 7724 48047 Docker 182.3684.90
+RUN get-plugin 631 48088 python 2018.2.182.3684.101
 
 ## Docker
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-[[ -d /tmp/.X11-unix ]] && {
-    DISPLAY=$DISPLAY
+[[ $DISPLAY == *org.macosforge.xquartz* ]] && {
+    DISPLAY=$(ifconfig en0 | grep -P inet\ | cut -d' ' -f2):0
 } || {
-    DISPLAY=192.168.86.50:0
+    DISPLAY=$DISPLAY
 }
 
-docker ps -q -f name=devenv-data || docker create --name=devenv-data devenv
+[[ $(docker ps -aq -f name=devenv-data) == "" ]] && { echo "Creating data container..." && docker create --name=devenv-data devenv; }
 
 docker run -it --rm \
     -e DISPLAY=$DISPLAY \
