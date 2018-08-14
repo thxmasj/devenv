@@ -21,4 +21,5 @@ docker run -it --rm \
     --volumes-from=devenv-data \
     --name=devenv \
     --network=host \
+    --security-opt=seccomp:unconfined \
     devenv
