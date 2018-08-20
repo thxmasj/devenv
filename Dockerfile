@@ -26,15 +26,15 @@ RUN \
   apt update && apt install -y oracle-java8-installer
 
 ## IntelliJ IDEA
-ARG IDEA_VERSION=${IDEA_MINOR_VERSION}
-ARG IDEA_SHA256=dbe4bdd1c4cbce6ec549e0375227d64ac072200b2a92c8766ccb1fcd2ec5a65f
+ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.1-no-jdk
+ARG IDEA_SHA256=bbb56a1e2137b5c40aacaf35b2d088d56c84aae00efcb0647178a179d36bb179
 RUN curl -fL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
 # IntelliJ IDEA plugins
 COPY get-plugin /usr/local/bin
 RUN get-plugin 6317 47623 lombok-plugin 0.19-2018.EAP
-RUN get-plugin 9568 48153 intellij-go 182.3684.111.849
+RUN get-plugin 9568 48754 intellij-go 182.3911.47.873
 RUN get-plugin 7724 48047 Docker 182.3684.90
 RUN get-plugin 631 48088 python 2018.2.182.3684.101
 
