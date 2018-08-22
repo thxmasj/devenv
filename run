@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+CONTAINER_NAME=${1-devenv}
+
 [[ $DISPLAY == *org.macosforge.xquartz* ]] && {
     DISPLAY=$(ifconfig en0 | grep -P inet\ | cut -d' ' -f2):0
 } || {
@@ -19,7 +21,7 @@ docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -e SSH_AUTH_SOCK=/tmp/ssh_auth_sock \
     --volumes-from=devenv-data \
-    --name=devenv \
+    --name=${CONTAINER_NAME} \
     --network=host \
     --security-opt=seccomp:unconfined \
     devenv

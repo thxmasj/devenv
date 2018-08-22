@@ -84,5 +84,13 @@ ENV HOME /home/developer
 ENV PATH $PATH:/opt/mssql-tools/bin
 ENV PS1 \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$
 VOLUME ${SETTINGS_DIR}/config/options/
+WORKDIR $HOME
+RUN mkdir -p bin && curl -sf https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh -o bin/git-prompt.sh
+COPY .bashrc .bashrc
+ENV GIT_PS1_SHOWDIRTYSTATE 1
+ENV GIT_PS1_SHOWSTASHSTATE 1
+ENV GIT_PS1_SHOWUNTRACKEDFILES 1
+ENV GIT_PS1_SHOWUPSTREAM auto
+
 
 ENTRYPOINT ["/opt/idea/bin/idea.sh"]
