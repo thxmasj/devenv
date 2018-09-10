@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 RUN apt update && apt install -y tzdata
 RUN echo "Europe/Oslo" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
 
-RUN apt update && apt install -y sudo curl unzip git vim bash-completion \
+RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2-utils \
     # Required by IDEA
     libxext6 libxrender1 libxtst6 libxi6 libfreetype6 \
     default-jdk maven \
@@ -26,17 +26,17 @@ RUN \
   apt update && apt install -y oracle-java8-installer
 
 ## IntelliJ IDEA
-ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.1-no-jdk
-ARG IDEA_SHA256=bbb56a1e2137b5c40aacaf35b2d088d56c84aae00efcb0647178a179d36bb179
+ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.3-no-jdk
+ARG IDEA_SHA256=4854bf25ba0816e387f8afa0b9e0257314bb311ffd88a5634d06430ba515d306
 RUN curl -fL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
 # IntelliJ IDEA plugins
 COPY get-plugin /usr/local/bin
 RUN get-plugin 6317 47623 lombok-plugin 0.19-2018.EAP
-RUN get-plugin 9568 48754 intellij-go 182.3911.47.873
-RUN get-plugin 7724 48047 Docker 182.3684.90
-RUN get-plugin 631 48088 python 2018.2.182.3684.101
+RUN get-plugin 9568 49205 intellij-go 182.4129.55.890
+RUN get-plugin 7724 49638 Docker 182.4323.18
+RUN get-plugin 631 49639 python 2018.2.182.4323.46
 
 ## Docker
 
@@ -91,6 +91,5 @@ ENV GIT_PS1_SHOWDIRTYSTATE 1
 ENV GIT_PS1_SHOWSTASHSTATE 1
 ENV GIT_PS1_SHOWUNTRACKEDFILES 1
 ENV GIT_PS1_SHOWUPSTREAM auto
-
 
 ENTRYPOINT ["/opt/idea/bin/idea.sh"]
