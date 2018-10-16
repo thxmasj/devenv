@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 RUN apt update && apt install -y tzdata
 RUN echo "Europe/Oslo" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
 
-RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2-utils \
+RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2-utils socat net-tools \
     # Required by IDEA
     libxext6 libxrender1 libxtst6 libxi6 libfreetype6 \
     default-jdk maven \
@@ -25,10 +25,15 @@ RUN \
   add-apt-repository -y ppa:webupd8team/java && \
   apt update && apt install -y oracle-java8-installer
 
+## Adopt OpenJDK 11
+RUN \
+  mkdir /opt/java11 \
+  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_x64_linux_hotspot_11_28.tar.gz | sudo tar xz -C /opt/java11 --strip-components 2
+
 ## IntelliJ IDEA
 ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.3-no-jdk
 ARG IDEA_SHA256=4854bf25ba0816e387f8afa0b9e0257314bb311ffd88a5634d06430ba515d306
-RUN curl -fL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
+RUN curl -sSfL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
 # IntelliJ IDEA plugins
@@ -41,7 +46,7 @@ RUN get-plugin 631 49639 python 2018.2.182.4323.46
 ## Docker
 
 ARG DOCKER_GPG_KEY_FINGERPRINT="9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88"
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
+RUN curl -sSfL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
     && apt-key fingerprint "${DOCKER_GPG_KEY_FINGERPRINT}" | grep "${DOCKER_GPG_KEY_FINGERPRINT}" \
     && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
     && apt update \
@@ -50,20 +55,20 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
 ## Docker Compose
 
 ARG DOCKER_COMPOSE_VERSION=1.21.2
-RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose \
+RUN curl -sSfL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose \
-    && curl -L https://raw.githubusercontent.com/docker/compose/${DOCKER_COMPOSE_VERSION}/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
+    && curl -sSfL https://raw.githubusercontent.com/docker/compose/${DOCKER_COMPOSE_VERSION}/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
 
 ## Azure CLI
 
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/azure-cli.list \
-    && curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl -sSfL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && apt update && apt install -y azure-cli
 
 ## MSSQL Tools
 
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
+RUN curl -sSfL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl -sSfL https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
     && apt update && ACCEPT_EULA=y apt install -y mssql-tools unixodbc-dev
 
 RUN export uid=1000 gid=1000 && \
@@ -85,7 +90,7 @@ ENV PATH $PATH:/opt/mssql-tools/bin
 ENV PS1 \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$
 VOLUME ${SETTINGS_DIR}/config/options/
 WORKDIR $HOME
-RUN mkdir -p bin && curl -sf https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh -o bin/git-prompt.sh
+RUN mkdir -p bin && curl -sSfL https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh -o bin/git-prompt.sh
 COPY .bashrc .bashrc
 ENV GIT_PS1_SHOWDIRTYSTATE 1
 ENV GIT_PS1_SHOWSTASHSTATE 1
