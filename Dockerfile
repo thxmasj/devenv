@@ -19,11 +19,10 @@ RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2
 ARG IDEA_MINOR_VERSION=2018.2
 ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
 
-## Oracle Java
+## Adopt OpenJDK 8
 RUN \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt update && apt install -y oracle-java8-installer
+  mkdir /opt/java8 \
+  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_x64_linux_hotspot_8u181b13.tar.gz | sudo tar xz -C /opt/java8 --strip-components 2
 
 ## Adopt OpenJDK 11
 RUN \
@@ -86,7 +85,7 @@ RUN chown -R developer:developer /opt/idea/plugins
 
 USER developer
 ENV HOME /home/developer
-ENV PATH $PATH:/opt/mssql-tools/bin
+ENV PATH /opt/java8/bin:$PATH:/opt/mssql-tools/bin
 ENV PS1 \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$
 VOLUME ${SETTINGS_DIR}/config/options/
 WORKDIR $HOME
