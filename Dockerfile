@@ -29,18 +29,24 @@ RUN \
   mkdir /opt/java11 \
   && curl -sSfL https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_x64_linux_hotspot_11_28.tar.gz | sudo tar xz -C /opt/java11 --strip-components 2
 
+# Go 1.11
+RUN \
+  mkdir /opt/go1.11 \
+  && curl -sSfL https://dl.google.com/go/go1.11.linux-amd64.tar.gz | tar -xz -C /opt/go1.11 --strip-components 1
+
 ## IntelliJ IDEA
-ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.3-no-jdk
-ARG IDEA_SHA256=4854bf25ba0816e387f8afa0b9e0257314bb311ffd88a5634d06430ba515d306
+ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.5-no-jdk
+ARG IDEA_SHA256=e6bde7f16e67bbb49e62dc2c98d6fbfffd65ce9fde793eeb2aa0af51f1fab580
 RUN curl -sSfL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
 # IntelliJ IDEA plugins
 COPY get-plugin /usr/local/bin
-RUN get-plugin 6317 47623 lombok-plugin 0.19-2018.EAP
-RUN get-plugin 9568 49205 intellij-go 182.4129.55.890
+RUN get-plugin 6317 50582 lombok-plugin 0.21-2018.2
+RUN get-plugin 9568 50142 intellij-go 182.4505.32.913
 RUN get-plugin 7724 49638 Docker 182.4323.18
-RUN get-plugin 631 49639 python 2018.2.182.4323.46
+RUN get-plugin 631 50175 python 2018.2.182.4505.22
+RUN get-plugin 4230 46357 BashSupport 1.6.13.182
 
 ## Docker
 
@@ -53,7 +59,7 @@ RUN curl -sSfL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
 
 ## Docker Compose
 
-ARG DOCKER_COMPOSE_VERSION=1.21.2
+ARG DOCKER_COMPOSE_VERSION=1.22.0
 RUN curl -sSfL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose \
     && curl -sSfL https://raw.githubusercontent.com/docker/compose/${DOCKER_COMPOSE_VERSION}/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
@@ -67,7 +73,7 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb
 ## MSSQL Tools
 
 RUN curl -sSfL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl -sSfL https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
+    && curl -sSfL https://packages.microsoft.com/config/ubuntu/18.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
     && apt update && ACCEPT_EULA=y apt install -y mssql-tools unixodbc-dev
 
 RUN export uid=1000 gid=1000 && \
@@ -85,7 +91,7 @@ RUN chown -R developer:developer /opt/idea/plugins
 
 USER developer
 ENV HOME /home/developer
-ENV PATH /opt/java8/bin:$PATH:/opt/mssql-tools/bin
+ENV PATH /opt/java8/bin:/opt/go1.11/bin:$PATH:/opt/mssql-tools/bin
 ENV PS1 \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$
 VOLUME ${SETTINGS_DIR}/config/options/
 WORKDIR $HOME
