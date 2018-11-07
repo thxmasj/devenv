@@ -9,4 +9,4 @@ PLUGIN_NAME=$3
 PLUGIN_VERSION=$4
 
 curl -fL "${BASE_URL}/${PLUGIN_ID}/${PLUGIN_UPDATE_ID}/${PLUGIN_NAME}-${PLUGIN_VERSION}.zip" -o ${ZIP_FILE} \
-    && unzip ${ZIP_FILE} -d ${PLUGIN_DIR}
+    && unzip ${ZIP_FILE} -d ${PLUGIN_DIR} && rm ${ZIP_FILE}

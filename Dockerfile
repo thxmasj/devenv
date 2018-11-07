@@ -7,7 +7,7 @@ RUN echo "Europe/Oslo" > /etc/timezone && dpkg-reconfigure -f noninteractive tzd
 RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2-utils socat net-tools \
     # Required by IDEA
     libxext6 libxrender1 libxtst6 libxi6 libfreetype6 \
-    default-jdk maven \
+    maven \
     golang golang-glide go-bindata \
     python3-pip \
     lsb-release software-properties-common apt-utils locales \
@@ -16,31 +16,33 @@ RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2
     && pip3 install cryptography \
     && locale-gen en_US.UTF-8
 
-ARG IDEA_MINOR_VERSION=2018.2
+ARG IDEA_MINOR_VERSION=2018.3
 ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
 
 ## Adopt OpenJDK 8
 RUN \
   mkdir /opt/java8 \
-  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_x64_linux_hotspot_8u181b13.tar.gz | sudo tar xz -C /opt/java8 --strip-components 2
+  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_x64_linux_hotspot_8u181b13.tar.gz | tar xz -C /opt/java8 --strip-components 2
 
 ## Adopt OpenJDK 11
 RUN \
   mkdir /opt/java11 \
-  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_x64_linux_hotspot_11_28.tar.gz | sudo tar xz -C /opt/java11 --strip-components 2
+  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_x64_linux_hotspot_11_28.tar.gz | tar xz -C /opt/java11 --strip-components 2
 
 ## IntelliJ IDEA
-ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.3-no-jdk
-ARG IDEA_SHA256=4854bf25ba0816e387f8afa0b9e0257314bb311ffd88a5634d06430ba515d306
+#ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.3-no-jdk
+ARG IDEA_VERSION=183.3975.18-no-jdk
+ARG IDEA_SHA256=90911fb4911f3061333c9fa2f0fb5d946c6f19948e6e636e2f24f96b9ad681b0
 RUN curl -sSfL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
 # IntelliJ IDEA plugins
 COPY get-plugin /usr/local/bin
-RUN get-plugin 6317 47623 lombok-plugin 0.19-2018.EAP
-RUN get-plugin 9568 49205 intellij-go 182.4129.55.890
-RUN get-plugin 7724 49638 Docker 182.4323.18
-RUN get-plugin 631 49639 python 2018.2.182.4323.46
+RUN get-plugin 6317 50583 lombok-plugin 0.21-183.2153.8
+RUN get-plugin 9568 51404 intellij-go 183.3975.18.1484
+#RUN get-plugin 7724 51179 Docker 183.3795.13
+RUN get-plugin 631 51172 python 2018.3.183.3795.13
+RUN get-plugin 4230 49710 BashSupport 1.6.13.183
 
 ## Docker
 
