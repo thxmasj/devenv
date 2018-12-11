@@ -75,6 +75,9 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb
 RUN curl -sSfL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl -sSfL https://packages.microsoft.com/config/ubuntu/18.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
     && apt update && ACCEPT_EULA=y apt install -y mssql-tools unixodbc-dev
+RUN curl -sSfL https://github.com/vippsas/mssql-jdbc/releases/download/v7.0.0-vipps-201812111300/mssql-jdbc-7.0.0.jre8.jar \
+    -o $SETTINGS_DIR/config/jdbc-drivers/SQL\ Server/7.0.0/mssql-jdbc-7.0.0.jre8.jar \
+    --create-dirs
 
 RUN export uid=1000 gid=1000 && \
     mkdir -p /home/developer && \
@@ -101,5 +104,8 @@ ENV GIT_PS1_SHOWDIRTYSTATE 1
 ENV GIT_PS1_SHOWSTASHSTATE 1
 ENV GIT_PS1_SHOWUNTRACKEDFILES 1
 ENV GIT_PS1_SHOWUPSTREAM auto
+RUN git config --global user.name "Thomas Johansen" && \
+    git config --global user.email "thxmasj@gmail.com" && \
+    git config --global url.git@bitbucket.org:.insteadOf https://bitbucket.org/
 
 ENTRYPOINT ["/opt/idea/bin/idea.sh"]
