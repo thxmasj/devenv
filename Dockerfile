@@ -16,7 +16,7 @@ RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2
     && pip3 install cryptography \
     && locale-gen en_US.UTF-8
 
-ARG IDEA_MINOR_VERSION=2018.2
+ARG IDEA_MINOR_VERSION=2018.3
 ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
 
 ## Adopt OpenJDK 8
@@ -32,21 +32,21 @@ RUN \
 # Go 1.11
 RUN \
   mkdir /opt/go1.11 \
-  && curl -sSfL https://dl.google.com/go/go1.11.linux-amd64.tar.gz | tar -xz -C /opt/go1.11 --strip-components 1
+  && curl -sSfL https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz | tar -xz -C /opt/go1.11 --strip-components 1
 
 ## IntelliJ IDEA
-ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.5-no-jdk
-ARG IDEA_SHA256=e6bde7f16e67bbb49e62dc2c98d6fbfffd65ce9fde793eeb2aa0af51f1fab580
+ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.2-no-jdk
+ARG IDEA_SHA256=b6b7461312b85f59c3c95292096811da4f59bc1fa1effd681e94f0aa9840a1be
 RUN curl -sSfL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
     && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
 
 # IntelliJ IDEA plugins
 COPY get-plugin /usr/local/bin
-RUN get-plugin 6317 50582 lombok-plugin 0.21-2018.2
-RUN get-plugin 9568 50142 intellij-go 182.4505.32.913
-RUN get-plugin 7724 49638 Docker 182.4323.18
-RUN get-plugin 631 50175 python 2018.2.182.4505.22
-RUN get-plugin 4230 46357 BashSupport 1.6.13.182
+RUN get-plugin 6317 53293 lombok-plugin 0.23-2018.3
+RUN get-plugin 9568 53342 intellij-go 183.4886.37.1581
+#RUN get-plugin 7724 53386 Docker 183.5153.1
+RUN get-plugin 631 53587 python 2018.3.183.5153.8
+RUN get-plugin 4230 53225 BashSupport 1.7.4
 
 ## Docker
 
