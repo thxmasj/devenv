@@ -9,7 +9,7 @@ RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2
     libxext6 libxrender1 libxtst6 libxi6 libfreetype6 \
     default-jdk maven \
     golang golang-glide go-bindata \
-    python3-pip \
+    python3-pip python-yaml \
     lsb-release software-properties-common apt-utils locales \
     # Required by JavaFX (IDEA, Markdown plugin)
     gtk3.0 \
@@ -32,7 +32,7 @@ RUN \
 # Go 1.11
 RUN \
   mkdir /opt/go1.11 \
-  && curl -sSfL https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz | tar -xz -C /opt/go1.11 --strip-components 1
+  && curl -sSfL https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz | tar -xz -C /opt/go1.11 --strip-components 1
 
 ## IntelliJ IDEA
 ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.2-no-jdk
@@ -78,6 +78,11 @@ RUN curl -sSfL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl -sSfL https://github.com/vippsas/mssql-jdbc/releases/download/v7.0.0-vipps-201812111300/mssql-jdbc-7.0.0.jre8.jar \
     -o $SETTINGS_DIR/config/jdbc-drivers/SQL\ Server/7.0.0/mssql-jdbc-7.0.0.jre8.jar \
     --create-dirs
+
+## Kubernetes client
+RUN echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list \
+    && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
+    && apt update && apt install -y kubectl
 
 RUN export uid=1000 gid=1000 && \
     mkdir -p /home/developer && \
