@@ -111,6 +111,7 @@ ENV GIT_PS1_SHOWUNTRACKEDFILES 1
 ENV GIT_PS1_SHOWUPSTREAM auto
 RUN git config --global user.name "Thomas Johansen" && \
     git config --global user.email "thxmasj@gmail.com" && \
-    git config --global url.git@bitbucket.org:.insteadOf https://bitbucket.org/
+    git config --global url.git@bitbucket.org:.insteadOf https://bitbucket.org/ && \
+    git config --global url.git@github.com:vippsas/.insteadOf https://github.com/vippsas/
 
 ENTRYPOINT ["/opt/idea/bin/idea.sh"]
