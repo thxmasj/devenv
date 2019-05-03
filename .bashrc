@@ -1,3 +1,5 @@
+source /etc/bash_completion
+
 color_prompt=yes
 
 if [ "$color_prompt" = yes ]; then
