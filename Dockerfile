@@ -48,6 +48,9 @@ RUN curl -sSfL https://storage.googleapis.com/kubernetes-release/release/v1.15.0
 
 FROM ubuntu:19.04
 
+# Avoid interactive prompt on setting up keyboard-configuration package
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Avoid interactive prompt on GTK installation
 RUN apt update && apt install -y tzdata
 RUN echo "Europe/Oslo" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
