@@ -1,4 +1,52 @@
-FROM ubuntu:18.04
+FROM alpine:3.10.1 as idea
+RUN apk add --no-cache curl unzip
+ARG IDEA_VERSION=2019.2.1
+RUN mkdir /idea \
+    && curl -sSfL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz \
+    | tar xz -C /idea --strip-components 1
+ARG BASE_URL=https://plugins.jetbrains.com/files
+ARG PLUGIN_DIR=/idea/plugins
+RUN curl -sSfL "${BASE_URL}/6317/67665/lombok-plugin-0.26.2-2019.2.zip" -o /tmp/p1 && unzip /tmp/p1 -d ${PLUGIN_DIR}
+RUN curl -sSfL "${BASE_URL}/9568/66978/intellij-go-192.6262.9.287.zip" -o /tmp/p2 && unzip /tmp/p2 -d ${PLUGIN_DIR}
+RUN curl -sSfL "${BASE_URL}/631/67573/python.zip" -o /tmp/p3 && unzip /tmp/p3 -d ${PLUGIN_DIR}
+RUN curl -sSfL "${BASE_URL}/4230/65772/BashSupport-1.7.12.192.zip" -o /tmp/p4 && unzip /tmp/p4 -d ${PLUGIN_DIR}
+#RUN curl -sSfL "${BASE_URL}/7724/66972/Docker.zip" -o /tmp/p5 && unzip /tmp/p5 -d ${PLUGIN_DIR}
+
+FROM alpine:3.10.1 as java8
+RUN apk add --no-cache curl
+RUN mkdir /java8 \
+  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_x64_linux_hotspot_8u181b13.tar.gz \
+  | tar xz -C /java8 --strip-components 2
+
+FROM alpine:3.10.1 as java11
+RUN apk add --no-cache curl
+RUN mkdir /java11 \
+  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_x64_linux_hotspot_11_28.tar.gz \
+  | tar xz -C /java11 --strip-components 2
+
+FROM alpine:3.10.1 as java12
+RUN apk add --no-cache curl
+RUN mkdir /java12 \
+  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_x64_linux_hotspot_12.0.2_10.tar.gz \
+  | tar xz -C /java12 --strip-components 1
+
+FROM alpine:3.10.1 as go1_11
+RUN apk add --no-cache curl
+RUN \
+  mkdir /go \
+  && curl -sSfL https://dl.google.com/go/go1.11.13.linux-amd64.tar.gz | tar -xz -C /go --strip-components 1
+
+FROM alpine:3.10.1 as go1_12
+RUN apk add --no-cache curl
+RUN \
+  mkdir /go \
+  && curl -sSfL https://dl.google.com/go/go1.12.9.linux-amd64.tar.gz | tar -xz -C /go --strip-components 1
+
+FROM alpine:3.10.1 as kubectl
+RUN apk add --no-cache curl
+RUN curl -sSfL https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/linux/amd64/kubectl -o /kubectl
+
+FROM ubuntu:19.04
 
 # Avoid interactive prompt on GTK installation
 RUN apt update && apt install -y tzdata
@@ -16,37 +64,18 @@ RUN apt update && apt install -y sudo curl unzip git vim bash-completion libxml2
     && pip3 install cryptography \
     && locale-gen en_US.UTF-8
 
-ARG IDEA_MINOR_VERSION=2018.3
+RUN apt update && apt install -y nvidia-340 mesa-utils
+
+ARG IDEA_MINOR_VERSION=2019.2
 ARG SETTINGS_DIR=/home/developer/.IntelliJIdea${IDEA_MINOR_VERSION}
 
-## Adopt OpenJDK 8
-RUN \
-  mkdir /opt/java8 \
-  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_x64_linux_hotspot_8u181b13.tar.gz | sudo tar xz -C /opt/java8 --strip-components 2
-
-## Adopt OpenJDK 11
-RUN \
-  mkdir /opt/java11 \
-  && curl -sSfL https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_x64_linux_hotspot_11_28.tar.gz | sudo tar xz -C /opt/java11 --strip-components 2
-
-# Go 1.11
-RUN \
-  mkdir /opt/go1.11 \
-  && curl -sSfL https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz | tar -xz -C /opt/go1.11 --strip-components 1
-
-## IntelliJ IDEA
-ARG IDEA_VERSION=${IDEA_MINOR_VERSION}.2-no-jdk
-ARG IDEA_SHA256=b6b7461312b85f59c3c95292096811da4f59bc1fa1effd681e94f0aa9840a1be
-RUN curl -sSfL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz -o /tmp/idea.tgz \
-    && echo $IDEA_SHA256 /tmp/idea.tgz | sha256sum -c - && tar -C /opt -xzvf /tmp/idea.tgz && mv /opt/idea* /opt/idea
-
-# IntelliJ IDEA plugins
-COPY get-plugin /usr/local/bin
-RUN get-plugin 6317 53293 lombok-plugin 0.23-2018.3
-RUN get-plugin 9568 53342 intellij-go 183.4886.37.1581
-#RUN get-plugin 7724 53386 Docker 183.5153.1
-RUN get-plugin 631 53587 python 2018.3.183.5153.8
-RUN get-plugin 4230 53225 BashSupport 1.7.4
+COPY --from=java8 /java8 /opt/java8
+COPY --from=java11 /java11 /opt/java11
+COPY --from=java12 /java12 /opt/java12
+COPY --from=go1_11 /go /opt/go1.11
+COPY --from=go1_12 /go /opt/go1.12
+COPY --from=idea /idea/ /opt/idea/
+COPY --from=kubectl /kubectl /usr/local/bin/kubectl
 
 ## Docker
 
@@ -73,16 +102,11 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb
 ## MSSQL Tools
 
 RUN curl -sSfL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl -sSfL https://packages.microsoft.com/config/ubuntu/18.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
+    && curl -sSfL https://packages.microsoft.com/config/ubuntu/19.04/prod.list | tee /etc/apt/sources.list.d/msprod.list \
     && apt update && ACCEPT_EULA=y apt install -y mssql-tools unixodbc-dev
 RUN curl -sSfL https://github.com/vippsas/mssql-jdbc/releases/download/v7.0.0-vipps-201812111300/mssql-jdbc-7.0.0.jre8.jar \
     -o $SETTINGS_DIR/config/jdbc-drivers/SQL\ Server/7.0.0/mssql-jdbc-7.0.0.jre8.jar \
     --create-dirs
-
-## Kubernetes client
-RUN echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list \
-    && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
-    && apt update && apt install -y kubectl
 
 RUN export uid=1000 gid=1000 && \
     mkdir -p /home/developer && \
