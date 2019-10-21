@@ -1,15 +1,15 @@
 FROM alpine:3.10.1 as idea
 RUN apk add --no-cache curl unzip
-ARG IDEA_VERSION=2019.2.1
+ARG IDEA_VERSION=2019.2.3
 RUN mkdir /idea \
     && curl -sSfL https://download-cf.jetbrains.com/idea/ideaIU-${IDEA_VERSION}.tar.gz \
     | tar xz -C /idea --strip-components 1
 ARG BASE_URL=https://plugins.jetbrains.com/files
 ARG PLUGIN_DIR=/idea/plugins
-RUN curl -sSfL "${BASE_URL}/6317/67665/lombok-plugin-0.26.2-2019.2.zip" -o /tmp/p1 && unzip /tmp/p1 -d ${PLUGIN_DIR}
+RUN curl -sSfL "${BASE_URL}/6317/69852/lombok-plugin-0.27-2019.2.zip" -o /tmp/p1 && unzip /tmp/p1 -d ${PLUGIN_DIR}
 RUN curl -sSfL "${BASE_URL}/9568/66978/intellij-go-192.6262.9.287.zip" -o /tmp/p2 && unzip /tmp/p2 -d ${PLUGIN_DIR}
 RUN curl -sSfL "${BASE_URL}/631/67573/python.zip" -o /tmp/p3 && unzip /tmp/p3 -d ${PLUGIN_DIR}
-RUN curl -sSfL "${BASE_URL}/4230/65772/BashSupport-1.7.12.192.zip" -o /tmp/p4 && unzip /tmp/p4 -d ${PLUGIN_DIR}
+#RUN curl -sSfL "${BASE_URL}/4230/65772/BashSupport-1.7.12.192.zip" -o /tmp/p4 && unzip /tmp/p4 -d ${PLUGIN_DIR}
 #RUN curl -sSfL "${BASE_URL}/7724/66972/Docker.zip" -o /tmp/p5 && unzip /tmp/p5 -d ${PLUGIN_DIR}
 
 FROM alpine:3.10.1 as java8
